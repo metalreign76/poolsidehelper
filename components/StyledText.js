@@ -6,3 +6,9 @@ export function MonoText(props) {
     <Text {...props} style={[props.style, { fontFamily: 'space-mono' }]} />
   );
 }
+
+export function RubikText(props) {
+  return (
+    <Text {...props} style={[props.style, { fontFamily: 'rubik-bold' }]} />
+  );
+}

@@ -1,14 +1,33 @@
 import React from 'react';
-import { ExpoConfigView } from '@expo/samples';
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { RubikText } from '../components/StyledText';
 
 export default function SettingsScreen() {
-  /**
-   * Go ahead and delete ExpoConfigView and replace it with your content;
-   * we just wanted to give you a quick view of your config.
-   */
-  return <ExpoConfigView />;
+  return (
+    <View>
+      <RubikText style={styles.settingsFormText}>Swimming Club Name</RubikText>
+      <RubikText style={styles.settingsFormText}>Club Guid</RubikText>
+    </View>
+  );
 }
 
+const styles = StyleSheet.create({
+  settingsFormText: {
+    marginLeft: 10,
+    marginTop: 20,
+    fontSize: 20
+  }
+});
+
 SettingsScreen.navigationOptions = {
-  title: 'app.json',
+  title: 'Key Swimming Club Settings',
 };
