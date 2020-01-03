@@ -10,7 +10,7 @@
       "web"
     ],
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/poolsidehelper.png",
     "splash": {
       "image": "./assets/images/poolsidehelper.png",
