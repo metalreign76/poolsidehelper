@@ -9,6 +9,6 @@ export function MonoText(props) {
 
 export function RubikText(props) {
   return (
-    <Text {...props} style={[props.style, { fontFamily: 'rubik-bold' }]} />
+    <Text {...props} style={[props.style, { fontFamily: 'rubik-italic' }]} />
   );
 }

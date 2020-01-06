@@ -1,20 +1,33 @@
 import { AppLoading } from 'expo';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
-import React, { useState } from 'react';
+import React, { setGlobal, useGlobal } from 'reactn';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import AppNavigator from './navigation/AppNavigator';
+import { AsyncStorage } from 'react-native';
+
+
+  // Set an initial global state directly:
+  setGlobal({
+    clubName: '',
+    clubGUID: '',
+    scmToken: '',
+    isLoadingComplete: false
+  });
 
 
 export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
-  
+  const [isLoadingComplete, setLoadingComplete] = useGlobal('isLoadingComplete');
+  const [clubName, setClubName] = useGlobal('clubName');
+  const [clubGUID, setClubGUID] = useGlobal('clubGUID');
+  const [scmToken, setSCMToken] = useGlobal('scmToken');
+
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return (
       <AppLoading
-        startAsync={loadResourcesAsync}
+        startAsync={() => loadResourcesAsync(setClubName, setClubGUID, setSCMToken)}
         onError={handleLoadingError}
         onFinish={() => handleFinishLoading(setLoadingComplete)}
       />
@@ -29,8 +42,8 @@ export default function App(props) {
   }
 }
 
-async function loadResourcesAsync() {
-  await Promise.all([
+async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken) {
+  let resultsArray = await Promise.all([
     Asset.loadAsync([
       require('./assets/images/poolsidehelper.png'),
       require('./assets/images/robot-prod.png'),
@@ -41,9 +54,13 @@ async function loadResourcesAsync() {
       // We include SpaceMono because we use it in HomeScreen.js. Feel free to
       // remove this if you are not using it in your app
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
-      'rubik-bold': require('./assets/fonts/Rubik-Bold.ttf'),
     }),
+      AsyncStorage.multiGet(['CLUBNAME', 'CLUBGUID', 'SCMTOKEN'])
   ]);
+  console.log("Storage:", resultsArray[2][0][1], resultsArray[2][1][1] );
+  setClubName(resultsArray[2][0][1]);
+  setClubGUID(resultsArray[2][1][1]);
+  setSCMToken(resultsArray[2][2][1])
 }
 
 function handleLoadingError(error) {
