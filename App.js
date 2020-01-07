@@ -14,6 +14,8 @@ import { AsyncStorage } from 'react-native';
     clubName: '',
     clubGUID: '',
     scmToken: '',
+    scmConnected: false,
+    awsConnected: false,
     isLoadingComplete: false
   });
 

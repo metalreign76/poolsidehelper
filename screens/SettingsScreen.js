@@ -1,9 +1,8 @@
-import React, { setGlobal, useGlobal } from 'reactn';
+import React, { useGlobal } from 'reactn';
 import {
   StyleSheet,
   View,
 } from 'react-native';
-import { RubikText } from '../components/StyledText';
 import { AsyncStorage } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 import { useEffect } from 'react';
