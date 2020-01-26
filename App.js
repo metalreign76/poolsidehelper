@@ -14,9 +14,9 @@ import { AsyncStorage } from 'react-native';
     clubName: '',
     clubGUID: '',
     scmToken: '',
-    scmConnected: false,
-    awsConnected: false,
-    isLoadingComplete: false
+    isLoadingComplete: false,
+    members: [],
+    apiToken: ''
   });
 
 
@@ -25,11 +25,12 @@ export default function App(props) {
   const [clubName, setClubName] = useGlobal('clubName');
   const [clubGUID, setClubGUID] = useGlobal('clubGUID');
   const [scmToken, setSCMToken] = useGlobal('scmToken');
+  const [apiToken, setApiToken] = useGlobal('apiToken');
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return (
       <AppLoading
-        startAsync={() => loadResourcesAsync(setClubName, setClubGUID, setSCMToken)}
+        startAsync={() => loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiToken)}
         onError={handleLoadingError}
         onFinish={() => handleFinishLoading(setLoadingComplete)}
       />
@@ -44,7 +45,7 @@ export default function App(props) {
   }
 }
 
-async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken) {
+async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiToken) {
   let resultsArray = await Promise.all([
     Asset.loadAsync([
       require('./assets/images/poolsidehelper.png'),
@@ -57,12 +58,13 @@ async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken) {
       // remove this if you are not using it in your app
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
     }),
-      AsyncStorage.multiGet(['CLUBNAME', 'CLUBGUID', 'SCMTOKEN'])
+      AsyncStorage.multiGet(['CLUBNAME', 'CLUBGUID', 'SCMTOKEN', 'APITOKEN'])
   ]);
   console.log("Storage:", resultsArray[2][0][1], resultsArray[2][1][1] );
   setClubName(resultsArray[2][0][1]);
   setClubGUID(resultsArray[2][1][1]);
   setSCMToken(resultsArray[2][2][1])
+  setApiToken(resultsArray[2][3][1])
 }
 
 function handleLoadingError(error) {

@@ -2,6 +2,7 @@ import React, { useGlobal } from 'reactn';
 import {
   StyleSheet,
   View,
+  ScrollView
 } from 'react-native';
 import { AsyncStorage } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
@@ -12,13 +13,19 @@ export default function SettingsScreen() {
   const [clubName, setClubName] = useGlobal('clubName');
   const [clubGUID, setClubGUID] = useGlobal('clubGUID');
   const [scmToken, setSCMToken] = useGlobal('scmToken');
+  const [apiToken, setApiToken] = useGlobal('apiToken');
 
   useEffect(() => {
-    AsyncStorage.multiSet([['CLUBNAME', clubName], ['CLUBGUID', clubGUID], ['SCMTOKEN', scmToken]])
+    AsyncStorage.multiSet([
+      ['CLUBNAME', clubName], 
+      ['CLUBGUID', clubGUID], 
+      ['SCMTOKEN', scmToken],
+      ['APITOKEN', apiToken],
+    ])
   })
 
   return (
-    <View>
+    <ScrollView>
       <View> 
         <TextField  
           containerStyle={styles.inputFormField}
@@ -71,7 +78,24 @@ export default function SettingsScreen() {
           defaultValue = {scmToken}
         />
       </View>      
-    </View>
+      <View> 
+        <TextField  
+          containerStyle={styles.inputFormField}
+          label='API Token'
+          labelTextStyle={styles.settingsFormText}
+          onChangeText={apiToken => {
+            setApiToken(apiToken);
+          }}               
+          placeholder = "API Token"          
+          onBlur={() => {
+            console.log("Storing....", apiToken)
+          }}
+          placeholderTextColor = "#014576"
+          autoCapitalize = "none"
+          defaultValue = {apiToken}
+        />
+      </View>      
+    </ScrollView>
   );
 }
 
