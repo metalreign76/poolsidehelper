@@ -21,7 +21,7 @@ function showAppropriateStatusIcon(status) {
               name='check-circle'
               type='font-awesome'
               color='green'
-              size={80}
+              size={60}
             />
           break;
     case 'failed': 
@@ -29,7 +29,7 @@ function showAppropriateStatusIcon(status) {
               name='times-circle'
               type='font-awesome'
               color='red'
-              size={80}
+              size={60}
             />
         break;
         case 'pending' :
@@ -86,7 +86,13 @@ export default function StatusScreen() {
       <View style={styles.container}>
         <ConnectedStatusView header="SCM Connection"/>
         <View style={styles.statusContainer}>{ showAppropriateStatusIcon(scmConnected) }</View>
-        
+        <Icon
+              name='retweet'
+              type='font-awesome'
+              color='#014576'
+              size={50}
+              onPress={() => { setSCMConnected(null)}}
+            />
       </View>
       <View style={styles.container}>
         <ConnectedStatusView header="Facial Rec. Connection"/>
@@ -109,6 +115,6 @@ const styles = StyleSheet.create({
     borderColor: '#014576',
   },
   statusContainer: {
-    marginVertical: 80
+    marginVertical: 40
   }
 });
