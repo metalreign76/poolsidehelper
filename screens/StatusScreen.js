@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements'
 
+
 import ConnectedStatusView from '../components/connectedStatusView';
 
 function showAppropriateStatusIcon(status) {
@@ -49,7 +50,6 @@ export default function StatusScreen() {
   const [awsConnected, setAWSConnected] = useState(null);
 
   useEffect( () => {
-    setTimeout(() => setAWSConnected('failed'), 1500)
 
     if(scmConnected) return;
 
@@ -58,13 +58,12 @@ export default function StatusScreen() {
     setSCMConnected('pending');
 
     fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/SCM/members', {
-      method: 'POST', // or 'PUT'
+      method: 'GET', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
         'Authorization-Token': scmToken,
         'x-api-key': apiToken
-      },
-      body: {}
+      }
     })
     .then((response) => {
       return response.json()
@@ -79,7 +78,43 @@ export default function StatusScreen() {
       console.error('Error:', error);
     });
 
-  }, [scmConnected, awsConnected])
+  }, [scmConnected])
+
+  useEffect( () => {
+    if(awsConnected) return;
+
+    console.log("Calling SCM with ", scmToken)
+
+    setAWSConnected('pending');
+
+    fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/AWS/collection', {
+      method: 'GET', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization-Token': scmToken,
+        'x-api-key': apiToken
+      }
+    })
+    .then((response) => {
+      switch(response.status) {
+        case 200: 
+          return response.json();
+          break;
+        default:
+          throw new Error("Error received: "+response.status);
+          break;
+      }
+    })
+    .then((responseJSON) => {
+      console.log('Data returned:', responseJSON.data);
+      setAWSConnected('connected');
+    })
+    .catch((error) => {
+      setAWSConnected('failed')
+      console.log('Error returned:', error);
+    });
+
+  }, [awsConnected])
 
   return (
     <View style={{flex: 1, flexDirection: 'row'}}>
@@ -97,6 +132,13 @@ export default function StatusScreen() {
       <View style={styles.container}>
         <ConnectedStatusView header="Facial Rec. Connection"/>
         <View style={styles.statusContainer}>{ showAppropriateStatusIcon(awsConnected) }</View>
+        <Icon
+              name='retweet'
+              type='font-awesome'
+              color='#014576'
+              size={50}
+              onPress={() => { setAWSConnected(null)}}
+            />
       </View>
     </View>
   );
