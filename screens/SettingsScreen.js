@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     marginTop: 5
   },
   inputFormField: {
-    width: '50%',
+    width: '90%',
     marginLeft: 10,
     paddingLeft: 5
   }

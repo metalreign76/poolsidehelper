@@ -10,7 +10,7 @@
       "web"
     ],
     "version": "1.0.0",
-    "orientation": "landscape",
+    // "orientation": "landscape",
     "icon": "./assets/images/poolsidehelper.png",
     "splash": {
       "image": "./assets/images/poolsidehelper.png",
@@ -24,7 +24,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.limavadyASC.poolsidehelper"
+    },
+    "android": {
+      "package": "com.limavadyASC.poolsidehelper",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA"
+      ]
     }
   }
 }
