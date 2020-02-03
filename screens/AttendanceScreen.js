@@ -8,7 +8,24 @@ import { Camera } from 'expo-camera';
 import { NavigationEvents } from 'react-navigation';
 import * as ImageManipulator from 'expo-image-manipulator';
 
-function sendImageForProcessing(apiToken, selectedMember, picData, setPictureStatus, clubGuid) {
+function findSwimmerName(members, memberId) {
+  console.log("Looking for", memberId)
+  for(var i=0; i< members.length; i++) {
+    if(members[i].id == memberId)
+      return members[i].name
+  }
+  return "Could not identify Swimmer by Name"
+}
+
+function sendImageForProcessing(
+  apiToken, 
+  picData, 
+  setPictureStatus, 
+  setRegButtonDisabled, 
+  setStatusMessage,
+  clubGuid, members) {
+
+  var responseStatus;
 
   ImageManipulator.manipulateAsync(picData.uri,
     [{ resize: {width: 200} }],
@@ -17,33 +34,47 @@ function sendImageForProcessing(apiToken, selectedMember, picData, setPictureSta
   .then((smallImage) => {
     console.log("ImageSize", smallImage.base64.length)
 
-    return fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/AWS/registration', {
+    return fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/AWS/match', {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiToken
       },
       body: JSON.stringify({
-        photoId: selectedMember,
         photo64: smallImage.base64,
         clubGUID: clubGuid
       })
     })
   })
   .then((response) => {
-    switch(response.status) {
+    responseStatus = response.status;
+    return response.json();
+  })
+  .then((responseJSON) => {
+    switch(responseStatus) {
       case 200: 
-      setPictureStatus('processed');
-      return response.json()
-          break;
+        setRegButtonDisabled(false);
+        console.log("Response:", responseJSON)
+        if(responseJSON.data.length == 0) {
+          setPictureStatus('failed');
+          setStatusMessage('Sorry, we couldnt match your picture. Try again? - or let a coach know you arent marked in')
+        }
+        else {
+          setPictureStatus('processed');
+          setStatusMessage(findSwimmerName(members, responseJSON.data[0]))
+        }
+        break;
       default:
-        throw new Error("Error received: "+response.status);
+        setPictureStatus('failed');
+        throw new Error("Error received: "+responseJSON.status);
         break;
     }
   })
   .catch((error) => {
-    console.error('Error:', error);
+    console.log('Error:', error);
     setPictureStatus('failed');
+    setRegButtonDisabled(false);
+    setStatusMessage('Sorry, we couldnt match your picture. Try again? - or let a coach know you arent marked in')
   });
 }
 
@@ -65,7 +96,7 @@ function showAppropriateStatusIcon(status) {
       return <Icon
               name='times-circle'
               type='font-awesome'
-              color='red'
+              color='#a30d17'
               size={60}
             />
         break;
@@ -76,7 +107,7 @@ function showAppropriateStatusIcon(status) {
 
 }
 
-export default function RegisterScreen() {
+export default function AttendanceScreen() {
 
   const [clubGUID, setClubGUID] = useGlobal('clubGUID');
   const [scmToken, setSCMToken] = useGlobal('scmToken');
@@ -84,12 +115,13 @@ export default function RegisterScreen() {
   const [apiToken, setApiToken] = useGlobal('apiToken');
   const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [regButtonDisabled, setRegButtonDisabled] = useState(true);
+  const [regButtonDisabled, setRegButtonDisabled] = useState(false);
   const [buttonText, setButtonText] = useState('Register');
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [pictureStatus, setPictureStatus] = useState('');
   const [screenLoaded, setScreenLoaded] = useState(true);
+  const [statusMessage, setStatusMessage] = useState('');
 
   var theCamera;
   
@@ -100,8 +132,6 @@ export default function RegisterScreen() {
         name: member.MemberName
       }
     })
-    console.log("Members:", membersList[0]);
-    console.log("Members:", membersList.length);
     setMembers(membersList);
   }, [membersArr])
 
@@ -168,56 +198,38 @@ export default function RegisterScreen() {
           )}
       </View>
       <View style={styles.container}>
-        <Text style={styles.labels}>
-          Select Member..
-        </Text>
-        <SearchableDropdown
-          onTextChange={text => {}}
-          onItemSelect={item => {
-              setSelectedMember(item);
-              setRegButtonDisabled(false);
-              setPictureStatus('');
-            }
-          }
-          onPress={ () => { }}
-          containerStyle={styles.searchableStyle}
-          textInputStyle={styles.searchableText}
-          itemStyle={styles.searchableDropdownStyle}
-          itemTextStyle={styles.searchableItemsStyle}
-          itemsContainerStyle={styles.searchableContainerStyle}
-          items={members}
-          //defaultIndex={2}
-          placeholder="start typing member name"
-          resetValue={false}
-          underlineColorAndroid="transparent"
-        />
         <Button
-          title={'Register'}
+          title={'Mark Me Here!'}
           buttonStyle={styles.buttonStyle}
           disabled={regButtonDisabled}
           onPress={() => {
+            setStatusMessage('Checking......')
             setPictureStatus('processing');
             setRegButtonDisabled(true);
             theCamera.takePictureAsync()
             .then((picture) => {
-              console.log("Storing", selectedMember);
               sendImageForProcessing(
-                apiToken, 
-                selectedMember.id, 
+                apiToken,
                 picture, 
-                setPictureStatus, 
-                clubGUID)
+                setPictureStatus,
+                setRegButtonDisabled, 
+                setStatusMessage,
+                clubGUID, members)
             })
           }}
         />
-        <View style={styles.statusContainer}>{ showAppropriateStatusIcon(pictureStatus) }</View>
+        <View style={styles.statusContainer}>
+          { showAppropriateStatusIcon(pictureStatus) }
+          <Text style={styles.attendanceOutcome}>{statusMessage}</Text>
+        </View>
+        
       </View>
     </View>
   );
 }
 
 
-RegisterScreen.navigationOptions = {
+AttendanceScreen.navigationOptions = {
   headerShown: false,
 };
 
@@ -227,41 +239,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     borderWidth: 0.25,
-    borderColor: '#014576',
+    borderColor: '#014576'
   },
-  labels: {
-    marginTop: 20,
-    marginLeft:10,
-    color: '#014576'
-  },
-  searchableStyle: {
-    padding: 10
-  },
-  searchableText: {
-    padding: 5,
-    borderWidth: 1,
-    borderColor: '#014576',
-    backgroundColor: '#FAF7F6',
-    color: '#014576'
-  },
-  searchableDropdownStyle: {
-    padding: 10,
-    marginTop: 2,
-    backgroundColor: '#FAF9F8',
-    borderColor: '#014576',
-    borderWidth: 1,
-  },
-  searchableItemsStyle: {
-    //text style of a single dropdown item
-    color: '#014576',
-  },
-  searchableContainerStyle: {
-    //items container style you can pass maxHeight
-    //to restrict the items dropdown hieght
-    maxHeight: '80%',
-  },
-  buttonStyle: {
-    backgroundColor: '#014576',
+    buttonStyle: {
+    backgroundColor: '#a30d17',
+    height: 100,
     marginLeft: 10,
     marginRight: 10,
     marginTop: 20
@@ -271,6 +253,18 @@ const styles = StyleSheet.create({
     margin: 10 
   },
   statusContainer: {
-    marginVertical: 40
+    flexDirection: 'row',
+    marginVertical: 30,
+    alignItems: 'flex-start',
+    marginLeft: 10,
+    marginRight: 10
+  },
+  attendanceOutcome: {
+    flex: 1,
+    fontSize: 20,
+    color: '#014576',
+    marginLeft: 10,
+    marginTop: 5,
+    flexWrap: 'wrap'
   }
 });

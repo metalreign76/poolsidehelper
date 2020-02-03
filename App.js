@@ -60,7 +60,6 @@ async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiT
     }),
       AsyncStorage.multiGet(['CLUBNAME', 'CLUBGUID', 'SCMTOKEN', 'APITOKEN'])
   ]);
-  console.log("Storage:", resultsArray[2][0][1], resultsArray[2][1][1] );
   setClubName(resultsArray[2][0][1]);
   setClubGUID(resultsArray[2][1][1]);
   setSCMToken(resultsArray[2][2][1])

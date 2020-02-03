@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements'
 
-
 import ConnectedStatusView from '../components/connectedStatusView';
 
 function showAppropriateStatusIcon(status) {
@@ -48,6 +47,7 @@ export default function StatusScreen() {
   const [apiToken, setApiToken] = useGlobal('apiToken');
   const [scmConnected, setSCMConnected] = useState(null);
   const [awsConnected, setAWSConnected] = useState(null);
+  const [flexOrientation, setFlexOrientation] = useState('row')
 
   useEffect( () => {
 
@@ -58,12 +58,13 @@ export default function StatusScreen() {
     setSCMConnected('pending');
 
     fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/SCM/members', {
-      method: 'GET', // or 'PUT'
+      method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
         'Authorization-Token': scmToken,
         'x-api-key': apiToken
-      }
+      },
+      body: JSON.stringify({ clubGUID: clubGUID})
     })
     .then((response) => {
       return response.json()
@@ -88,12 +89,13 @@ export default function StatusScreen() {
     setAWSConnected('pending');
 
     fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/AWS/collection', {
-      method: 'GET', // or 'PUT'
+      method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
-        'Authorization-Token': scmToken,
+        // 'Authorization-Token': scmToken,
         'x-api-key': apiToken
-      }
+      },
+      body: JSON.stringify({ clubGUID: clubGUID})
     })
     .then((response) => {
       switch(response.status) {
@@ -117,7 +119,7 @@ export default function StatusScreen() {
   }, [awsConnected])
 
   return (
-    <View style={{flex: 1, flexDirection: 'row'}}>
+    <View style={{flex: 1, flexDirection: flexOrientation}}>
       <View style={styles.container}>
         <ConnectedStatusView header="SCM Connection"/>
         <View style={styles.statusContainer}>{ showAppropriateStatusIcon(scmConnected) }</View>

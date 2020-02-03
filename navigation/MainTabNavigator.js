@@ -7,6 +7,7 @@ import TabBarIcon from '../components/TabBarIcon';
 import StatusScreen from '../screens/StatusScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import AttendanceScreen from '../screens/AttendanceScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -36,21 +37,37 @@ StatusStack.navigationOptions = {
 
 StatusStack.path = '';
 
-const LinksStack = createStackNavigator(
+const RegisterStack = createStackNavigator(
   {
-    Links: RegisterScreen,
+    Register: RegisterScreen,
   },
   config
 );
 
-LinksStack.navigationOptions = {
+RegisterStack.navigationOptions = {
   tabBarLabel: 'Register',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-person-add' : 'md-person-add'} />
   ),
 };
 
-LinksStack.path = '';
+RegisterStack.path = '';
+
+const AttendanceStack = createStackNavigator(
+  {
+    Attendance: AttendanceScreen,
+  },
+  config
+);
+
+AttendanceStack.navigationOptions = {
+  tabBarLabel: 'Attendance',
+  tabBarIcon: ({ focused }) => (
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-checkmark-circle-outline' : 'md-checkmark-circle-outline'} />
+  ),
+};
+
+AttendanceStack.path = '';
 
 const SettingsStack = createStackNavigator(
   {
@@ -70,7 +87,8 @@ SettingsStack.path = '';
 
 const tabNavigator = createBottomTabNavigator({
   StatusStack,
-  LinksStack,
+  RegisterStack,
+  AttendanceStack,
   SettingsStack,
 });
 
