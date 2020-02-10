@@ -26,11 +26,12 @@ export default function App(props) {
   const [clubGUID, setClubGUID] = useGlobal('clubGUID');
   const [scmToken, setSCMToken] = useGlobal('scmToken');
   const [apiToken, setApiToken] = useGlobal('apiToken');
+  const [securityPin, setSecurityPin] = useGlobal('securityPin');
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return (
       <AppLoading
-        startAsync={() => loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiToken)}
+        startAsync={() => loadResourcesAsync(setClubGUID, setSCMToken, setApiToken, setSecurityPin)}
         onError={handleLoadingError}
         onFinish={() => handleFinishLoading(setLoadingComplete)}
       />
@@ -45,7 +46,7 @@ export default function App(props) {
   }
 }
 
-async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiToken) {
+async function loadResourcesAsync(setClubGUID, setSCMToken, setApiToken, setSecurityPin) {
   let resultsArray = await Promise.all([
     Asset.loadAsync([
       require('./assets/images/poolsidehelper.png'),
@@ -58,12 +59,12 @@ async function loadResourcesAsync(setClubName, setClubGUID, setSCMToken, setApiT
       // remove this if you are not using it in your app
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
     }),
-      AsyncStorage.multiGet(['CLUBNAME', 'CLUBGUID', 'SCMTOKEN', 'APITOKEN'])
+      AsyncStorage.multiGet(['CLUBGUID', 'SCMTOKEN', 'APITOKEN', 'SECURITYPIN'])
   ]);
-  setClubName(resultsArray[2][0][1]);
-  setClubGUID(resultsArray[2][1][1]);
-  setSCMToken(resultsArray[2][2][1])
-  setApiToken(resultsArray[2][3][1])
+  setClubGUID(resultsArray[2][0][1]);
+  setSCMToken(resultsArray[2][1][1])
+  setApiToken(resultsArray[2][2][1])
+  setSecurityPin(resultsArray[2][3][1]);
 }
 
 function handleLoadingError(error) {

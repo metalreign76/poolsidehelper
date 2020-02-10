@@ -18,23 +18,23 @@ function showAppropriateStatusIcon(status) {
   switch(status) {
     case 'connected': 
       return <Icon
-              name='check-circle'
-              type='font-awesome'
+              name={Platform.OS === 'ios' ? 'ios-checkmark-circle' : 'md-checkmark-circle'}                
+              type='ionicon'
               color='green'
               size={60}
             />
           break;
     case 'failed': 
       return <Icon
-              name='times-circle'
-              type='font-awesome'
+              name={Platform.OS === 'ios' ? 'ios-close-circle' : 'md-close-circle'}                
+              type='ionicon'
               color='red'
               size={60}
             />
         break;
         case 'pending' :
     default: 
-    return <ActivityIndicator size="large" color="#014576"/>
+    return <ActivityIndicator size={60} color="#014576"/>
   }
 
 }
@@ -53,8 +53,6 @@ export default function StatusScreen() {
 
     if(scmConnected) return;
 
-    console.log("Calling SCM with ", scmToken)
-
     setSCMConnected('pending');
 
     fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/SCM/members', {
@@ -67,24 +65,28 @@ export default function StatusScreen() {
       body: JSON.stringify({ clubGUID: clubGUID})
     })
     .then((response) => {
-      return response.json()
+      switch(response.status) {
+        case 200: 
+          return response.json();
+          break;
+        default:
+          throw new Error("Error received: "+response.status);
+          break;
+      }
     })
     .then((responseJSON) => {
-      console.log('Members returned:', responseJSON.data.length);
       setSCMConnected('connected');
       setMembersArr(responseJSON.data);
     })
     .catch((error) => {
       setSCMConnected('failed')
-      console.error('Error:', error);
+      console.log('Error returned:', error);
     });
 
   }, [scmConnected])
 
   useEffect( () => {
     if(awsConnected) return;
-
-    console.log("Calling SCM with ", scmToken)
 
     setAWSConnected('pending');
 
@@ -108,7 +110,6 @@ export default function StatusScreen() {
       }
     })
     .then((responseJSON) => {
-      console.log('Data returned:', responseJSON.data);
       setAWSConnected('connected');
     })
     .catch((error) => {
@@ -124,10 +125,10 @@ export default function StatusScreen() {
         <ConnectedStatusView header="SCM Connection"/>
         <View style={styles.statusContainer}>{ showAppropriateStatusIcon(scmConnected) }</View>
         <Icon
-              name='retweet'
-              type='font-awesome'
+              name={Platform.OS === 'ios' ? 'ios-refresh-circle' : 'md-refresh-circle'}                
+              type='ionicon'
               color='#014576'
-              size={50}
+              size={60}
               onPress={() => { setSCMConnected(null)}}
             />
       </View>
@@ -135,10 +136,10 @@ export default function StatusScreen() {
         <ConnectedStatusView header="Facial Rec. Connection"/>
         <View style={styles.statusContainer}>{ showAppropriateStatusIcon(awsConnected) }</View>
         <Icon
-              name='retweet'
-              type='font-awesome'
+              name={Platform.OS === 'ios' ? 'ios-refresh-circle' : 'md-refresh-circle'}                
+              type='ionicon'
               color='#014576'
-              size={50}
+              size={60}
               onPress={() => { setAWSConnected(null)}}
             />
       </View>

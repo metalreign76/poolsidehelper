@@ -199,7 +199,7 @@ export default function AttendanceScreen() {
       </View>
       <View style={styles.container}>
         <Button
-          title={'Mark Me Here!'}
+          title={'Mark Me Present!'}
           buttonStyle={styles.buttonStyle}
           disabled={regButtonDisabled}
           onPress={() => {
@@ -222,7 +222,8 @@ export default function AttendanceScreen() {
           { showAppropriateStatusIcon(pictureStatus) }
           <Text style={styles.attendanceOutcome}>{statusMessage}</Text>
         </View>
-        
+        <View style={styles.sessionDesc}>        
+        </View>
       </View>
     </View>
   );
@@ -254,10 +255,10 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     flexDirection: 'row',
-    marginVertical: 30,
     alignItems: 'flex-start',
     marginLeft: 10,
-    marginRight: 10
+    marginRight: 10,
+    marginTop: 20,
   },
   attendanceOutcome: {
     flex: 1,
@@ -266,5 +267,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: 5,
     flexWrap: 'wrap'
+  },
+  sessionDesc: {
+    borderWidth: 1,
+    height: 50,
+    width: '75%',
+    marginLeft: 70,
+    marginTop: 5,
+    borderColor: '#014576',
   }
 });

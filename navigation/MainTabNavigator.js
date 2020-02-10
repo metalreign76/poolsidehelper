@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from 'react-navigation-tabs';
 import TabBarIcon from '../components/TabBarIcon';
 import StatusScreen from '../screens/StatusScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AttendanceScreen from '../screens/AttendanceScreen';
 
@@ -69,6 +70,22 @@ AttendanceStack.navigationOptions = {
 
 AttendanceStack.path = '';
 
+const ReportsStack = createStackNavigator(
+  {
+    Reports: ReportsScreen,
+  },
+  config
+);
+
+ReportsStack.navigationOptions = {
+  tabBarLabel: 'Reports',
+  tabBarIcon: ({ focused }) => (
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-list' : 'md-list'} />
+  ),
+};
+
+ReportsStack.path = '';
+
 const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
@@ -89,6 +106,7 @@ const tabNavigator = createBottomTabNavigator({
   StatusStack,
   RegisterStack,
   AttendanceStack,
+  ReportsStack,
   SettingsStack,
 });
 
