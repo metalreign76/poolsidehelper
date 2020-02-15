@@ -19,10 +19,12 @@ function findSwimmerName(members, memberId) {
 
 function sendImageForProcessing(
   apiToken, 
+  scmToken,
   picData, 
   setPictureStatus, 
   setRegButtonDisabled, 
   setStatusMessage,
+  setRecordedSession,
   clubGuid, members) {
 
   var responseStatus;
@@ -38,7 +40,9 @@ function sendImageForProcessing(
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiToken
+        'x-api-key': apiToken,
+        'Authorization-Token': scmToken,
+
       },
       body: JSON.stringify({
         photo64: smallImage.base64,
@@ -57,11 +61,12 @@ function sendImageForProcessing(
         console.log("Response:", responseJSON)
         if(responseJSON.data.length == 0) {
           setPictureStatus('failed');
-          setStatusMessage('Sorry, we couldnt match your picture. Try again? - or let a coach know you arent marked in')
+          setStatusMessage('Sorry, we couldnt match your picture. Try again? - or let a coach know you are not marked in')
         }
         else {
           setPictureStatus('processed');
           setStatusMessage(findSwimmerName(members, responseJSON.data[0]))
+          setRecordedSession(responseJSON.session);
         }
         break;
       default:
@@ -102,7 +107,7 @@ function showAppropriateStatusIcon(status) {
         break;
     case 'processing' :
     default: 
-      return <ActivityIndicator size="large" color="#014576"/>
+      return <ActivityIndicator size={60} color="#014576"/>
   }
 
 }
@@ -122,6 +127,7 @@ export default function AttendanceScreen() {
   const [pictureStatus, setPictureStatus] = useState('');
   const [screenLoaded, setScreenLoaded] = useState(true);
   const [statusMessage, setStatusMessage] = useState('');
+  const [recordedSession, setRecordedSession] = useState('');
 
   var theCamera;
   
@@ -205,15 +211,18 @@ export default function AttendanceScreen() {
           onPress={() => {
             setStatusMessage('Checking......')
             setPictureStatus('processing');
+            setRecordedSession('');
             setRegButtonDisabled(true);
             theCamera.takePictureAsync()
             .then((picture) => {
               sendImageForProcessing(
                 apiToken,
+                scmToken,
                 picture, 
                 setPictureStatus,
                 setRegButtonDisabled, 
                 setStatusMessage,
+                setRecordedSession,
                 clubGUID, members)
             })
           }}
@@ -222,7 +231,8 @@ export default function AttendanceScreen() {
           { showAppropriateStatusIcon(pictureStatus) }
           <Text style={styles.attendanceOutcome}>{statusMessage}</Text>
         </View>
-        <View style={styles.sessionDesc}>        
+        <View style={styles.sessionDesc}>      
+          <Text style={styles.sessionTextDesc}>{recordedSession}</Text>
         </View>
       </View>
     </View>
@@ -269,11 +279,17 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   sessionDesc: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     height: 50,
     width: '75%',
     marginLeft: 70,
     marginTop: 5,
     borderColor: '#014576',
+    alignItems: 'center',
+    paddingTop: 10,
+  },
+  sessionTextDesc: {
+    fontSize: 15,
+    color: '#014576',
   }
 });

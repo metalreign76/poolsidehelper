@@ -12,6 +12,16 @@ import {
 import { NavigationEvents } from 'react-navigation';
 import Modal from "react-native-modal";
 
+daysOfWeek = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+]
+
 function getMemberData(
   selectedMember, 
   scmToken, 
@@ -51,6 +61,46 @@ function getMemberData(
   });
 }
 
+function retrieveAttendanceRecords(
+  sessionID,
+  scmToken, 
+  apiToken,
+  clubGUID,
+  members,
+  setAttendees,
+  setAttendeeReportVisible
+) {
+
+  fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/SCM/getattendance/' + sessionID, {
+    method: 'POST', // or 'PUT'
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization-Token': scmToken,
+      'x-api-key': apiToken
+    },
+    body: JSON.stringify({ clubGUID: clubGUID})
+  })
+  .then((response) => {
+    return response.json()
+  })
+  .then((responseJSON) => {
+    var membersJson = {};
+    members.forEach(member => {
+      membersJson[member.id] = member.name;
+    })
+    var attendees = [];
+    responseJSON.data.forEach((attendee, idx) => {
+      attendees.push({ key: "key_"+idx, name: membersJson[attendee]})
+    })
+    setAttendees(attendees);
+    setAttendeeReportVisible(true);
+  })
+  .catch((error) => {
+    console.log("Error:", error)
+  });
+
+}
+
 export default function ReportsScreen() {
 
   const [clubGUID, setClubGUID] = useGlobal('clubGUID');
@@ -58,13 +108,17 @@ export default function ReportsScreen() {
   const [membersArr, setMembersArr] = useGlobal('members');
   const [apiToken, setApiToken] = useGlobal('apiToken');
   const [members, setMembers] = useState([]);
+  const [sessions, setSessions] = useState([{Guid: '0', WeekDay: '', SessionName: ''}]);
+  const [sessionsLoaded, setSessionsLoaded] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [regButtonDisabled, setRegButtonDisabled] = useState(true);
   const [findingMember, setFindingMember] = useState(false);
   const [securityPin, setSecurityPin] = useGlobal('securityPin');
   const [memberDetails, setMemberDetails] = useState([]);
   const [showMemberDetails, setShowMemberDetails] = useState(false);
-  
+  const [attendees, setAttendees] = useState([]);
+  const [attendeeReportVisible, setAttendeeReportVisible] = useState(false)
+
   useEffect( () => {
     const membersList = membersArr.map((member) => {
       return {
@@ -74,6 +128,33 @@ export default function ReportsScreen() {
     })
     setMembers(membersList);
   }, [membersArr])
+  
+  useEffect( () => {
+
+    fetch('https://nx3dyozzzd.execute-api.eu-west-1.amazonaws.com/beta/SCM/sessions/', {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization-Token': scmToken,
+        'x-api-key': apiToken
+      },
+      body: JSON.stringify({ clubGUID: clubGUID})
+    })
+    .then((response) => {
+      return response.json()
+    })
+    .then((responseJSON) => {
+      setSessionsLoaded(true);
+      var today = new Date().getDay();
+      var todaysSessions = responseJSON.data.filter(session => {
+        return session.SessionDay == daysOfWeek[today]
+      })
+      setSessions(todaysSessions);
+    })
+    .catch((error) => {
+      console.log("Error:", error)
+    });
+  }, [sessionsLoaded])
 
 
   const [pinNbrEntered, setPinNbrEntered] = useState('');
@@ -135,7 +216,52 @@ export default function ReportsScreen() {
           onDidBlur={() => setPinValidated(false)}
         />
         <View style={styles.container}>
-          <Text>Reports</Text>
+          <FlatList
+            data={sessions}
+            renderItem={({ item }) =>
+              <Button
+                title={"Attended - " + item.SessionName} 
+                buttonStyle={styles.reportsButtonStyle}
+                onPress={ () => {
+                  retrieveAttendanceRecords(
+                    item.Guid,
+                    scmToken,
+                    apiToken,
+                    clubGUID,
+                    members,
+                    setAttendees,
+                    setAttendeeReportVisible
+                  )
+                }}
+              />                
+            }
+            keyExtractor={item => item.Guid}
+          />
+          <View>
+            <Modal isVisible={attendeeReportVisible}>
+              <View style={styles.modalStyle}>
+                <FlatList
+                  data={attendees}
+                  renderItem={({ item }) =>
+                    <View>
+                      <Text style={styles.modalDescText}>{item.name}</Text>                    
+                    </View>
+                  }
+                  ItemSeparatorComponent={() => 
+                    <View style={styles.itemSeparator}/>
+                  }
+                  showsVerticalScrollIndicator={true}
+                />
+                <Button
+                  title={'Close'} 
+                  buttonStyle={styles.modalButtonStyle}
+                  onPress={() => {
+                    setAttendeeReportVisible(false);
+                  }}
+                />                
+              </View>
+            </Modal>
+          </View>
         </View>
         <View style={styles.container}>
           <Text style={styles.labels}>
@@ -224,6 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 0.25,
     borderColor: '#014576',
+    marginTop: 20,
   },
   labels: {
     marginTop: 20,
@@ -317,5 +444,12 @@ const styles = StyleSheet.create({
     width: "90%",
     backgroundColor: "#014576",
     marginTop: 5
+  },
+  reportsButtonStyle: {
+    backgroundColor: '#014576',
+    width: '80%',
+    marginLeft: '10%',
+    marginBottom: 10,
+    height: 60,
   }
 });
