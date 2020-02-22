@@ -50,7 +50,7 @@ function getMemberData(
     var listKeys = Object.keys(responseJSON.data);
     var i = 1;
     listKeys.forEach(field => {
-      listData.push({ key: i++, info: responseJSON.data[field], desc: field})
+      listData.push({ key: "key_" + i++, info: responseJSON.data[field], desc: field})
     })
     setMemberDetails(listData);
     setShowMemberDetails(true);
@@ -244,7 +244,7 @@ export default function ReportsScreen() {
                   data={attendees}
                   renderItem={({ item }) =>
                     <View>
-                      <Text style={styles.modalDescText}>{item.name}</Text>                    
+                      <Text style={styles.modalInfoText}>{item.name}</Text>                    
                     </View>
                   }
                   ItemSeparatorComponent={() => 
@@ -252,6 +252,7 @@ export default function ReportsScreen() {
                   }
                   showsVerticalScrollIndicator={true}
                 />
+                <Text style={styles.modalDescText}>Total: {attendees.length}</Text>
                 <Button
                   title={'Close'} 
                   buttonStyle={styles.modalButtonStyle}

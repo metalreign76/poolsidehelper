@@ -11,7 +11,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 function sendImageForProcessing(apiToken, selectedMember, picData, setPictureStatus, clubGuid) {
 
   ImageManipulator.manipulateAsync(picData.uri,
-    [{ resize: {width: 200} }],
+    [{ resize: {width: 240} }],
     { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
   )
   .then((smallImage) => {
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
   const [regButtonDisabled, setRegButtonDisabled] = useState(true);
   const [buttonText, setButtonText] = useState('Register');
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [type, setType] = useState(Camera.Constants.Type.front);
   const [pictureStatus, setPictureStatus] = useState('');
   const [screenLoaded, setScreenLoaded] = useState(true);
 
@@ -100,8 +100,6 @@ export default function RegisterScreen() {
         name: member.MemberName
       }
     })
-    console.log("Members:", membersList[0]);
-    console.log("Members:", membersList.length);
     setMembers(membersList);
   }, [membersArr])
 
@@ -127,7 +125,7 @@ export default function RegisterScreen() {
           onWillFocus={payload => setScreenLoaded(true)}
           onDidBlur={payload => setScreenLoaded(false)}/>
           { screenLoaded && (
-            <Camera style={styles.camera} type={type} ref={ref => {theCamera = ref;}}
+            <Camera style={styles.camera} ratio="1:1" type={type} ref={ref => {theCamera = ref;}}
               androidCameraPermissionOptions={{
                 title: 'Permission to use camera',
                 message: 'We need your permission to use your camera',
@@ -150,9 +148,9 @@ export default function RegisterScreen() {
               }}
               onPress={() => {
                 setType(
-                  type === Camera.Constants.Type.back
-                    ? Camera.Constants.Type.front
-                    : Camera.Constants.Type.back
+                  type === Camera.Constants.Type.front
+                    ? Camera.Constants.Type.back
+                    : Camera.Constants.Type.front
                 );
               }}>
               <Icon
@@ -200,7 +198,6 @@ export default function RegisterScreen() {
             setRegButtonDisabled(true);
             theCamera.takePictureAsync()
             .then((picture) => {
-              console.log("Storing", selectedMember);
               sendImageForProcessing(
                 apiToken, 
                 selectedMember.id, 
@@ -264,11 +261,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#014576',
     marginLeft: 10,
     marginRight: 10,
-    marginTop: 20
+    marginTop: 20,
+    height: 100
   },
   camera: { 
     flex: 1, 
-    margin: 10 
+    margin: 10,
   },
   statusContainer: {
     marginVertical: 40

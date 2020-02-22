@@ -129,7 +129,6 @@ export default function SettingsScreen() {
             }}               
             placeholder = "SCM Token"          
             onBlur={() => {
-              console.log("Storing....", scmToken)
             }}
             placeholderTextColor = "#014576"
             autoCapitalize = "none"
@@ -146,7 +145,6 @@ export default function SettingsScreen() {
             }}               
             placeholder = "API Token"          
             onBlur={() => {
-              console.log("Storing....", apiToken)
             }}
             placeholderTextColor = "#014576"
             autoCapitalize = "none"

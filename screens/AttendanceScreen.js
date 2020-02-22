@@ -9,7 +9,6 @@ import { NavigationEvents } from 'react-navigation';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 function findSwimmerName(members, memberId) {
-  console.log("Looking for", memberId)
   for(var i=0; i< members.length; i++) {
     if(members[i].id == memberId)
       return members[i].name
@@ -30,7 +29,7 @@ function sendImageForProcessing(
   var responseStatus;
 
   ImageManipulator.manipulateAsync(picData.uri,
-    [{ resize: {width: 200} }],
+    [{ resize: {width: 240} }],
     { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
   )
   .then((smallImage) => {
@@ -58,7 +57,6 @@ function sendImageForProcessing(
     switch(responseStatus) {
       case 200: 
         setRegButtonDisabled(false);
-        console.log("Response:", responseJSON)
         if(responseJSON.data.length == 0) {
           setPictureStatus('failed');
           setStatusMessage('Sorry, we couldnt match your picture. Try again? - or let a coach know you are not marked in')
@@ -123,7 +121,7 @@ export default function AttendanceScreen() {
   const [regButtonDisabled, setRegButtonDisabled] = useState(false);
   const [buttonText, setButtonText] = useState('Register');
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [type, setType] = useState(Camera.Constants.Type.front);
   const [pictureStatus, setPictureStatus] = useState('');
   const [screenLoaded, setScreenLoaded] = useState(true);
   const [statusMessage, setStatusMessage] = useState('');
@@ -163,7 +161,7 @@ export default function AttendanceScreen() {
           onWillFocus={payload => setScreenLoaded(true)}
           onDidBlur={payload => setScreenLoaded(false)}/>
           { screenLoaded && (
-            <Camera style={styles.camera} type={type} ref={ref => {theCamera = ref;}}
+            <Camera style={styles.camera} ratio="1:1" type={type} ref={ref => {theCamera = ref;}}
               androidCameraPermissionOptions={{
                 title: 'Permission to use camera',
                 message: 'We need your permission to use your camera',
