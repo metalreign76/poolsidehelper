@@ -215,7 +215,7 @@ export default function ReportsScreen() {
         <NavigationEvents
           onDidBlur={() => setPinValidated(false)}
         />
-        <View style={styles.container}>
+        <View style={styles.buttonsContainer}>
           <FlatList
             data={sessions}
             renderItem={({ item }) =>
@@ -352,6 +352,13 @@ const styles = StyleSheet.create({
     borderWidth: 0.25,
     borderColor: '#014576',
     marginTop: 20,
+  },
+  buttonsContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 0.25,
+    borderColor: '#014576',
+    paddingTop: 70,
   },
   labels: {
     marginTop: 20,

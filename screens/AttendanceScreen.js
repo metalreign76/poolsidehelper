@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     height: 50,
     width: '75%',
-    marginLeft: 70,
+    marginLeft: 75,
     marginTop: 5,
     borderColor: '#014576',
     alignItems: 'center',
@@ -289,5 +289,5 @@ const styles = StyleSheet.create({
   sessionTextDesc: {
     fontSize: 15,
     color: '#014576',
-  }
+  } 
 });
